@@ -8,7 +8,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Leaflet CSS & JS (Free OpenStreetMap library) -->
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -34,11 +34,23 @@
 
     <!-- Controls Form -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label for="trackSelect" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Circuit</label>
-        <select id="trackSelect" class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
-          <!-- Populated by JavaScript -->
-        </select>
+      
+      <!-- Searchable Track Select Dropdown -->
+      <div class="relative">
+        <label for="trackSearch" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Circuit</label>
+        <input 
+          type="text" 
+          id="trackSearch" 
+          placeholder="Search track, city, or country..." 
+          autocomplete="off"
+          class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+        />
+        <input type="hidden" id="trackSelect" value="donington">
+        
+        <!-- Options List Container -->
+        <ul id="trackDropdown" class="hidden absolute left-0 right-0 top-full mt-1 max-h-60 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 divide-y divide-slate-700/50">
+          <!-- Populated dynamically -->
+        </ul>
       </div>
 
       <div>
@@ -83,7 +95,7 @@
       </div>
     </div>
 
-    <!-- In-Game Recommendation Box -->
+    <!-- Recommendation Box -->
     <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl space-y-3">
       <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended Session Start Hours (Max Light Coverage)</h3>
       
@@ -99,18 +111,18 @@
           <span id="eveningGHAms2Hour" class="text-lg font-extrabold text-amber-300">--:00</span>
           <p id="eveningGHDetail" class="text-xs text-slate-400 mt-0.5">Captures peak evening light.</p>
         </div>
-  <div>
+        
+        <div>
           <span class="text-slate-400 block text-xs">Sunrise Stint:</span>
           <span id="sunriseAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
           <p id="sunriseDetail" class="text-xs text-slate-400 mt-0.5">Catches first morning light.</p>
         </div>
+        
         <div>
           <span class="text-slate-400 block text-xs">Sunset Stint:</span>
           <span id="sunsetAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
           <p id="sunsetDetail" class="text-xs text-slate-400 mt-0.5">Transitions directly into dusk.</p>
         </div>
-
-      
       </div>
     </div>
 
@@ -119,19 +131,16 @@
   <footer class="mt-8 text-slate-600 text-xs text-center">
     Times calculated in circuit local timezone. Built for SunsetLaps.
   </footer>
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2e52f2761d4d46349e541b0bf4664496"}'></script><!-- End Cloudflare Web Analytics -->
+
   <script>
     // Track Database
-    const tracks = [
-      /* --- UNITED KINGDOM & IRELAND --- */
+    const rawTracks = [
       { "id": "donington", "name": "Donington Park", "country": "UK", "lat": 52.8306, "lng": -1.3772, "timezone": "Europe/London" },
       { "id": "brands_hatch", "name": "Brands Hatch", "country": "UK", "lat": 51.3569, "lng": 0.2631, "timezone": "Europe/London" },
       { "id": "silverstone", "name": "Silverstone Circuit", "country": "UK", "lat": 52.0786, "lng": -1.0169, "timezone": "Europe/London" },
       { "id": "oulton_park", "name": "Oulton Park", "country": "UK", "lat": 53.1764, "lng": -2.6148, "timezone": "Europe/London" },
       { "id": "snetterton", "name": "Snetterton Circuit", "country": "UK", "lat": 52.4641, "lng": 0.9458, "timezone": "Europe/London" },
       { "id": "cadwell_park", "name": "Cadwell Park", "country": "UK", "lat": 53.3102, "lng": -0.0594, "timezone": "Europe/London" },
-
-      /* --- EUROPE --- */
       { "id": "spa", "name": "Circuit de Spa-Francorchamps", "country": "Belgium", "lat": 50.4372, "lng": 5.9714, "timezone": "Europe/Brussels" },
       { "id": "nuerburgring", "name": "Nürburgring", "country": "Germany", "lat": 50.3356, "lng": 6.9475, "timezone": "Europe/Berlin" },
       { "id": "hockenheimring", "name": "Hockenheimring", "country": "Germany", "lat": 49.3278, "lng": 8.5658, "timezone": "Europe/Berlin" },
@@ -143,8 +152,6 @@
       { "id": "spielberg", "name": "Red Bull Ring (Spielberg)", "country": "Austria", "lat": 47.2197, "lng": 14.7647, "timezone": "Europe/Vienna" },
       { "id": "lemans", "name": "Circuit des 24 Heures du Mans", "country": "France", "lat": 47.95, "lng": 0.2242, "timezone": "Europe/Paris" },
       { "id": "azure", "name": "Azure Circuit (Monaco)", "country": "Monaco", "lat": 43.7347, "lng": 7.4206, "timezone": "Europe/Monaco" },
-
-      /* --- NORTH AMERICA --- */
       { "id": "daytona", "name": "Daytona International Speedway", "country": "USA", "lat": 29.1856, "lng": -81.0705, "timezone": "America/New_York" },
       { "id": "sebring", "name": "Sebring International Raceway", "country": "USA", "lat": 27.4542, "lng": -81.3483, "timezone": "America/New_York" },
       { "id": "road_atlanta", "name": "Michelin Raceway Road Atlanta", "country": "USA", "lat": 34.1472, "lng": -83.8172, "timezone": "America/New_York" },
@@ -159,8 +166,6 @@
       { "id": "cleveland", "name": "Cleveland Burke Lakefront", "country": "USA", "lat": 41.5175, "lng": -81.6833, "timezone": "America/New_York" },
       { "id": "montreal", "name": "Circuit Gilles Villeneuve (Montréal)", "country": "Canada", "lat": 45.5, "lng": -73.5228, "timezone": "America/Toronto" },
       { "id": "ctmp", "name": "Canadian Tire Motorsport Park (Mosport)", "country": "Canada", "lat": 44.0547, "lng": -78.6756, "timezone": "America/Toronto" },
-
-      /* --- SOUTH AMERICA --- */
       { "id": "interlagos", "name": "Autódromo José Carlos Pace (Interlagos)", "country": "Brazil", "lat": -23.7036, "lng": -46.6997, "timezone": "America/Sao_Paulo" },
       { "id": "taruma", "name": "Autódromo Internacional de Tarumã", "country": "Brazil", "lat": -30.0381, "lng": -51.0183, "timezone": "America/Sao_Paulo" },
       { "id": "cascavel", "name": "Autódromo Internacional de Cascavel", "country": "Brazil", "lat": -24.9961, "lng": -53.3883, "timezone": "America/Sao_Paulo" },
@@ -181,21 +186,22 @@
       { "id": "cordoba", "name": "Autódromo Oscar Cabalén (Córdoba)", "country": "Argentina", "lat": -31.5583, "lng": -64.3853, "timezone": "America/Argentina/Cordoba" },
       { "id": "termas_rio_hondo", "name": "Autódromo Termas de Río Hondo", "country": "Argentina", "lat": -27.5081, "lng": -64.9039, "timezone": "America/Argentina/Tucuman" },
       { "id": "ibarra", "name": "Autódromo Internacional de Yahuarcocha (Ibarra)", "country": "Ecuador", "lat": 0.3708, "lng": -78.0933, "timezone": "America/Guayaquil" },
-
-      /* --- ASIA, AFRICA & OCEANIA --- */
       { "id": "suzuka", "name": "Suzuka Circuit (Kansai)", "country": "Japan", "lat": 34.8431, "lng": 136.541, "timezone": "Asia/Tokyo" },
       { "id": "bathurst", "name": "Mount Panorama Circuit (Bathurst)", "country": "Australia", "lat": -33.4536, "lng": 149.5518, "timezone": "Australia/Sydney" },
       { "id": "adelaide", "name": "Adelaide Street Circuit", "country": "Australia", "lat": -34.9272, "lng": 138.6164, "timezone": "Australia/Adelaide" },
       { "id": "kyalami", "name": "Kyalami Grand Prix Circuit", "country": "South Africa", "lat": -25.9981, "lng": 28.0688, "timezone": "Africa/Johannesburg" },
-
-      /* --- KART TRACKS --- */
       { "id": "granja_viana", "name": "Kartódromo Granja Viana", "country": "Brazil", "lat": -23.5853, "lng": -46.8528, "timezone": "America/Sao_Paulo" },
       { "id": "speedland", "name": "Speedland Kart Center", "country": "Brazil", "lat": -23.5683, "lng": -46.5756, "timezone": "America/Sao_Paulo" },
       { "id": "ortona", "name": "Circuito Internazionale d'Abruzzo (Ortona)", "country": "Italy", "lat": 42.3278, "lng": 14.3775, "timezone": "Europe/Rome" }
     ];
 
+    // Alphabetize tracks by name
+    const tracks = rawTracks.sort((a, b) => a.name.localeCompare(b.name));
+
     // DOM Elements
+    const trackSearch = document.getElementById('trackSearch');
     const trackSelect = document.getElementById('trackSelect');
+    const trackDropdown = document.getElementById('trackDropdown');
     const datePicker = document.getElementById('datePicker');
     
     // Set default date to today
@@ -217,13 +223,40 @@
       marker = L.marker([52.8306, -1.3772]).addTo(map);
     }
 
-    // Populate Dropdown
-    tracks.forEach(track => {
-      const option = document.createElement('option');
-      option.value = track.id;
-      option.textContent = `${track.name} (${track.country})`;
-      trackSelect.appendChild(option);
-    });
+    // Filter and render dropdown options
+    function renderDropdown(filterText = '') {
+      trackDropdown.innerHTML = '';
+      const query = filterText.toLowerCase().trim();
+
+      const filtered = tracks.filter(t => 
+        t.name.toLowerCase().includes(query) ||
+        t.country.toLowerCase().includes(query) ||
+        t.id.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        const emptyLi = document.createElement('li');
+        emptyLi.className = 'p-3 text-sm text-slate-500 italic';
+        emptyLi.textContent = 'No matching circuits found';
+        trackDropdown.appendChild(emptyLi);
+        return;
+      }
+
+      filtered.forEach(track => {
+        const li = document.createElement('li');
+        li.className = 'p-3 text-sm hover:bg-slate-700 cursor-pointer transition-colors flex justify-between items-center';
+        li.innerHTML = `<span class="font-medium text-slate-100">${track.name}</span><span class="text-xs text-slate-400 ml-2">${track.country}</span>`;
+        
+        li.addEventListener('click', () => {
+          trackSelect.value = track.id;
+          trackSearch.value = `${track.name} (${track.country})`;
+          trackDropdown.classList.add('hidden');
+          updateSolarTimes();
+        });
+
+        trackDropdown.appendChild(li);
+      });
+    }
 
     // Helper: Extract local hour and minute for a track timezone
     function getTrackLocalTimeComponents(utcDate, timeZone) {
@@ -243,7 +276,6 @@
       return { hour, minute };
     }
 
-    // Helper: Format string for HH:MM display
     function formatTimeStr(hour, minute) {
       const h = String(hour).padStart(2, '0');
       const m = String(minute).padStart(2, '0');
@@ -257,14 +289,11 @@
 
       if (!selectedTrack || !selectedDateVal) return;
 
-      // Create Date object at noon UTC to avoid edge-of-day offsets
       const [year, month, day] = selectedDateVal.split('-').map(Number);
       const targetDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 
-      // Calculate Solar Times via SunCalc
       const solarTimes = SunCalc.getTimes(targetDate, selectedTrack.lat, selectedTrack.lng);
 
-      // Convert times to track local components
       const dawn = getTrackLocalTimeComponents(solarTimes.dawn, selectedTrack.timezone);
       const sunrise = getTrackLocalTimeComponents(solarTimes.sunrise, selectedTrack.timezone);
       const morningGHEnd = getTrackLocalTimeComponents(solarTimes.goldenHourEnd, selectedTrack.timezone);
@@ -272,7 +301,6 @@
       const sunset = getTrackLocalTimeComponents(solarTimes.sunset, selectedTrack.timezone);
       const dusk = getTrackLocalTimeComponents(solarTimes.dusk, selectedTrack.timezone);
 
-      // Render exact solar times
       document.getElementById('dawnTime').textContent = formatTimeStr(dawn.hour, dawn.minute);
       document.getElementById('sunriseTime').textContent = formatTimeStr(sunrise.hour, sunrise.minute);
       document.getElementById('morningGHTime').textContent = `${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}`;
@@ -280,21 +308,11 @@
       document.getElementById('sunsetTime').textContent = formatTimeStr(sunset.hour, sunset.minute);
       document.getElementById('duskTime').textContent = formatTimeStr(dusk.hour, dusk.minute);
 
-      // Calculate Best Stint Start Hours (Max Light Coverage across 60 mins)
-      
-      // 1. Morning Golden Hour: Round start time (sunrise) to closest hour so 60m session overlaps peak window
       let morningGHStartHour = (sunrise.minute >= 30) ? (sunrise.hour + 1) % 24 : sunrise.hour;
-
-      // 2. Evening Golden Hour: Round start time to nearest hour around golden hour start
       let eveningGHStartHour = (eveningGHStart.minute >= 30) ? (eveningGHStart.hour + 1) % 24 : eveningGHStart.hour;
-
-      // 3. Sunset Stint: Start 30-45 mins before sunset so sunset happens mid-stint
       let sunsetStartHour = (sunset.minute < 30) ? (sunset.hour - 1 + 24) % 24 : sunset.hour;
-
-      // 4. Sunrise Stint: Start around dawn so full sunrise happens mid-stint
       let sunriseStartHour = (dawn.minute >= 30) ? (dawn.hour + 1) % 24 : dawn.hour;
 
-      // Render Recommendations
       document.getElementById('morningGHAms2Hour').textContent = `${String(morningGHStartHour).padStart(2, '0')}:00`;
       document.getElementById('morningGHDetail').textContent = `Morning GH window: ${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}.`;
 
@@ -307,20 +325,40 @@
       document.getElementById('sunriseAms2Hour').textContent = `${String(sunriseStartHour).padStart(2, '0')}:00`;
       document.getElementById('sunriseDetail').textContent = `Sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)} local time.`;
 
-      // Update Map Position & Simplified Popup (Sunrise & Sunset)
       const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
       map.flyTo(trackLatLng, 4, { duration: 1.2 });
       marker.setLatLng(trackLatLng);
       marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunrise: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
     }
 
-    // Event Listeners
-    trackSelect.addEventListener('change', updateSolarTimes);
+    // Event Listeners for Searchable Combobox
+    trackSearch.addEventListener('focus', () => {
+      renderDropdown(trackSearch.value);
+      trackDropdown.classList.remove('hidden');
+    });
+
+    trackSearch.addEventListener('input', () => {
+      renderDropdown(trackSearch.value);
+      trackDropdown.classList.remove('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!trackSearch.contains(e.target) && !trackDropdown.contains(e.target)) {
+        trackDropdown.classList.add('hidden');
+      }
+    });
+
     datePicker.addEventListener('change', updateSolarTimes);
 
     // Initial Load
     window.addEventListener('DOMContentLoaded', () => {
       initMap();
+      
+      // Set initial default track in search field
+      const defaultTrack = tracks.find(t => t.id === 'donington') || tracks[0];
+      trackSelect.value = defaultTrack.id;
+      trackSearch.value = `${defaultTrack.name} (${defaultTrack.country})`;
+      
       updateSolarTimes();
     });
   </script>
