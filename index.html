@@ -100,20 +100,76 @@
   <script>
     // AMS2 Track Database
     const tracks = [
-      { id: "donington", name: "Donington Park", country: "UK", lat: 52.8306, lng: -1.3772, timezone: "Europe/London" },
-      { id: "brands_hatch", name: "Brands Hatch", country: "UK", lat: 51.3569, lng: 0.2631, timezone: "Europe/London" },
-      { id: "silverstone", name: "Silverstone", country: "UK", lat: 52.0786, lng: -1.0169, timezone: "Europe/London" },
-      { id: "spa", name: "Circuit de Spa-Francorchamps", country: "Belgium", lat: 50.4372, lng: 5.9714, timezone: "Europe/Brussels" },
-      { id: "nuerburgring", name: "Nürburgring Nordschleife", country: "Germany", lat: 50.3356, lng: 6.9475, timezone: "Europe/Berlin" },
-      { id: "monza", name: "Autodromo Nazionale Monza", country: "Italy", lat: 45.6156, lng: 9.2811, timezone: "Europe/Rome" },
-      { id: "interlagos", name: "Interlagos (Autódromo José Carlos Pace)", country: "Brazil", lat: -23.7036, lng: -46.6997, timezone: "America/Sao_Paulo" },
-      { id: "bathurst", name: "Mount Panorama (Bathurst)", country: "Australia", lat: -33.4536, lng: 149.5518, timezone: "Australia/Sydney" },
-      { id: "daytona", name: "Daytona International Speedway", country: "USA", lat: 29.1856, lng: -81.0705, timezone: "America/New_York" },
-      { id: "laguna_seca", name: "WeatherTech Raceway Laguna Seca", country: "USA", lat: 36.5842, lng: -121.7535, timezone: "America/Los_Angeles" },
-      { id: "road_america", name: "Road America", country: "USA", lat: 43.8014, lng: -87.9936, timezone: "America/Chicago" },
-      { id: "suzuka", name: "Suzuka / Kansai", country: "Japan", lat: 34.8431, lng: 136.5410, timezone: "Asia/Tokyo" },
-      { id: "kyalami", name: "Kyalami Grand Prix Circuit", country: "South Africa", lat: -25.9981, lng: 28.0688, timezone: "Africa/Johannesburg" }
-    ];
+  /* --- UNITED KINGDOM & IRELAND --- */
+  { "id": "donington", "name": "Donington Park", "country": "UK", "lat": 52.8306, "lng": -1.3772, "timezone": "Europe/London" },
+  { "id": "brands_hatch", "name": "Brands Hatch", "country": "UK", "lat": 51.3569, "lng": 0.2631, "timezone": "Europe/London" },
+  { "id": "silverstone", "name": "Silverstone Circuit", "country": "UK", "lat": 52.0786, "lng": -1.0169, "timezone": "Europe/London" },
+  { "id": "oulton_park", "name": "Oulton Park", "country": "UK", "lat": 53.1764, "lng": -2.6148, "timezone": "Europe/London" },
+  { "id": "snetterton", "name": "Snetterton Circuit", "country": "UK", "lat": 52.4641, "lng": 0.9458, "timezone": "Europe/London" },
+  { "id": "cadwell_park", "name": "Cadwell Park", "country": "UK", "lat": 53.3102, "lng": -0.0594, "timezone": "Europe/London" },
+
+  /* --- EUROPE --- */
+  { "id": "spa", "name": "Circuit de Spa-Francorchamps", "country": "Belgium", "lat": 50.4372, "lng": 5.9714, "timezone": "Europe/Brussels" },
+  { "id": "nuerburgring", "name": "Nürburgring", "country": "Germany", "lat": 50.3356, "lng": 6.9475, "timezone": "Europe/Berlin" },
+  { "id": "hockenheimring", "name": "Hockenheimring", "country": "Germany", "lat": 49.3278, "lng": 8.5658, "timezone": "Europe/Berlin" },
+  { "id": "monza", "name": "Autodromo Nazionale Monza", "country": "Italy", "lat": 45.6156, "lng": 9.2811, "timezone": "Europe/Rome" },
+  { "id": "imola", "name": "Autodromo Enzo e Dino Ferrari (Imola)", "country": "Italy", "lat": 44.3439, "lng": 11.7167, "timezone": "Europe/Rome" },
+  { "id": "barcelona", "name": "Circuit de Barcelona-Catalunya", "country": "Spain", "lat": 41.57, "lng": 2.2611, "timezone": "Europe/Madrid" },
+  { "id": "jerez", "name": "Circuito de Jerez", "country": "Spain", "lat": 36.7083, "lng": -6.0342, "timezone": "Europe/Madrid" },
+  { "id": "cascais", "name": "Circuito do Estoril (Cascais)", "country": "Portugal", "lat": 38.7506, "lng": -9.3942, "timezone": "Europe/Lisbon" },
+  { "id": "spielberg", "name": "Red Bull Ring (Spielberg)", "country": "Austria", "lat": 47.2197, "lng": 14.7647, "timezone": "Europe/Vienna" },
+  { "id": "lemans", "name": "Circuit des 24 Heures du Mans", "country": "France", "lat": 47.95, "lng": 0.2242, "timezone": "Europe/Paris" },
+  { "id": "azure", "name": "Azure Circuit (Monaco)", "country": "Monaco", "lat": 43.7347, "lng": 7.4206, "timezone": "Europe/Monaco" },
+
+  /* --- NORTH AMERICA --- */
+  { "id": "daytona", "name": "Daytona International Speedway", "country": "USA", "lat": 29.1856, "lng": -81.0705, "timezone": "America/New_York" },
+  { "id": "sebring", "name": "Sebring International Raceway", "country": "USA", "lat": 27.4542, "lng": -81.3483, "timezone": "America/New_York" },
+  { "id": "road_atlanta", "name": "Michelin Raceway Road Atlanta", "country": "USA", "lat": 34.1472, "lng": -83.8172, "timezone": "America/New_York" },
+  { "id": "watkins_glen", "name": "Watkins Glen International", "country": "USA", "lat": 42.3369, "lng": -76.9272, "timezone": "America/New_York" },
+  { "id": "indianapolis", "name": "Indianapolis Motor Speedway", "country": "USA", "lat": 39.795, "lng": -86.2347, "timezone": "America/Indiana/Indianapolis" },
+  { "id": "road_america", "name": "Road America", "country": "USA", "lat": 43.8014, "lng": -87.9936, "timezone": "America/Chicago" },
+  { "id": "gateway", "name": "World Wide Technology Raceway (Gateway)", "country": "USA", "lat": 38.6522, "lng": -90.1361, "timezone": "America/Chicago" },
+  { "id": "virginia", "name": "Virginia International Raceway (VIR)", "country": "USA", "lat": 36.56, "lng": -79.2061, "timezone": "America/New_York" },
+  { "id": "laguna_seca", "name": "WeatherTech Raceway Laguna Seca", "country": "USA", "lat": 36.5842, "lng": -121.7535, "timezone": "America/Los_Angeles" },
+  { "id": "long_beach", "name": "Long Beach Street Circuit", "country": "USA", "lat": 33.7669, "lng": -118.1897, "timezone": "America/Los_Angeles" },
+  { "id": "fontana", "name": "Auto Club Speedway (Fontana)", "country": "USA", "lat": 34.0888, "lng": -117.5105, "timezone": "America/Los_Angeles" },
+  { "id": "cleveland", "name": "Cleveland Burke Lakefront", "country": "USA", "lat": 41.5175, "lng": -81.6833, "timezone": "America/New_York" },
+  { "id": "montreal", "name": "Circuit Gilles Villeneuve (Montréal)", "country": "Canada", "lat": 45.5, "lng": -73.5228, "timezone": "America/Toronto" },
+  { "id": "ctmp", "name": "Canadian Tire Motorsport Park (Mosport)", "country": "Canada", "lat": 44.0547, "lng": -78.6756, "timezone": "America/Toronto" },
+
+  /* --- SOUTH AMERICA --- */
+  { "id": "interlagos", "name": "Autódromo José Carlos Pace (Interlagos)", "country": "Brazil", "lat": -23.7036, "lng": -46.6997, "timezone": "America/Sao_Paulo" },
+  { "id": "taruma", "name": "Autódromo Internacional de Tarumã", "country": "Brazil", "lat": -30.0381, "lng": -51.0183, "timezone": "America/Sao_Paulo" },
+  { "id": "cascavel", "name": "Autódromo Internacional de Cascavel", "country": "Brazil", "lat": -24.9961, "lng": -53.3883, "timezone": "America/Sao_Paulo" },
+  { "id": "goiania", "name": "Autódromo Internacional de Goiânia", "country": "Brazil", "lat": -16.7192, "lng": -49.2008, "timezone": "America/Sao_Paulo" },
+  { "id": "curitiba", "name": "Autódromo Internacional de Curitiba", "country": "Brazil", "lat": -25.4419, "lng": -49.1931, "timezone": "America/Sao_Paulo" },
+  { "id": "velo_citta", "name": "Autódromo Velo Città", "country": "Brazil", "lat": -22.3167, "lng": -47.0167, "timezone": "America/Sao_Paulo" },
+  { "id": "velopark", "name": "Velopark", "country": "Brazil", "lat": -29.8514, "lng": -51.1831, "timezone": "America/Sao_Paulo" },
+  { "id": "londrina", "name": "Autódromo Internacional de Londrina", "country": "Brazil", "lat": -23.29, "lng": -51.1392, "timezone": "America/Sao_Paulo" },
+  { "id": "campo_grande", "name": "Autódromo Internacional de Campo Grande", "country": "Brazil", "lat": -20.4589, "lng": -54.5292, "timezone": "America/Campo_Grande" },
+  { "id": "curvelo", "name": "Circuito dos Cristais (Curvelo)", "country": "Brazil", "lat": -18.78, "lng": -44.4533, "timezone": "America/Sao_Paulo" },
+  { "id": "santa_cruz", "name": "Autódromo Internacional de Santa Cruz do Sul", "country": "Brazil", "lat": -29.7561, "lng": -52.4417, "timezone": "America/Sao_Paulo" },
+  { "id": "guapore", "name": "Autódromo Internacional de Guaporé", "country": "Brazil", "lat": -28.8472, "lng": -51.8842, "timezone": "America/Sao_Paulo" },
+  { "id": "salvador", "name": "Salvador Street Circuit", "country": "Brazil", "lat": -12.9814, "lng": -38.4528, "timezone": "America/Bahia" },
+  { "id": "galeao", "name": "Galeão Airport Circuit", "country": "Brazil", "lat": -22.8139, "lng": -43.2494, "timezone": "America/Sao_Paulo" },
+  { "id": "brasilia", "name": "Autódromo Internacional de Brasília", "country": "Brazil", "lat": -15.78, "lng": -47.8986, "timezone": "America/Sao_Paulo" },
+  { "id": "jacarepagua", "name": "Autódromo Internacional Nelson Piquet (Jacarepaguá)", "country": "Brazil", "lat": -22.9786, "lng": -43.3931, "timezone": "America/Sao_Paulo" },
+  { "id": "buenos_aires", "name": "Autódromo Oscar y Juan Gálvez (Buenos Aires)", "country": "Argentina", "lat": -34.6942, "lng": -58.4586, "timezone": "America/Argentina/Buenos_Aires" },
+  { "id": "cordoba", "name": "Autódromo Oscar Cabalén (Córdoba)", "country": "Argentina", "lat": -31.5583, "lng": -64.3853, "timezone": "America/Argentina/Cordoba" },
+  { "id": "termas_rio_hondo", "name": "Autódromo Termas de Río Hondo", "country": "Argentina", "lat": -27.5081, "lng": -64.9039, "timezone": "America/Argentina/Tucuman" },
+  { "id": "ibarra", "name": "Autódromo Internacional de Yahuarcocha (Ibarra)", "country": "Ecuador", "lat": 0.3708, "lng": -78.0933, "timezone": "America/Guayaquil" },
+
+  /* --- ASIA, AFRICA & OCEANIA --- */
+  { "id": "suzuka", "name": "Suzuka Circuit (Kansai)", "country": "Japan", "lat": 34.8431, "lng": 136.541, "timezone": "Asia/Tokyo" },
+  { "id": "bathurst", "name": "Mount Panorama Circuit (Bathurst)", "country": "Australia", "lat": -33.4536, "lng": 149.5518, "timezone": "Australia/Sydney" },
+  { "id": "adelaide", "name": "Adelaide Street Circuit", "country": "Australia", "lat": -34.9272, "lng": 138.6164, "timezone": "Australia/Adelaide" },
+  { "id": "kyalami", "name": "Kyalami Grand Prix Circuit", "country": "South Africa", "lat": -25.9981, "lng": 28.0688, "timezone": "Africa/Johannesburg" },
+
+  /* --- KART TRACKS --- */
+  { "id": "granja_viana", "name": "Kartódromo Granja Viana", "country": "Brazil", "lat": -23.5853, "lng": -46.8528, "timezone": "America/Sao_Paulo" },
+  { "id": "speedland", "name": "Speedland Kart Center", "country": "Brazil", "lat": -23.5683, "lng": -46.5756, "timezone": "America/Sao_Paulo" },
+  { "id": "ortona", "name": "Circuito Internazionale d'Abruzzo (Ortona)", "country": "Italy", "lat": 42.3278, "lng": 14.3775, "timezone": "Europe/Rome" }
+];
 
     // DOM Elements
     const trackSelect = document.getElementById('trackSelect');
