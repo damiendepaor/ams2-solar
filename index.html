@@ -25,7 +25,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col items-center p-4 sm:p-6">
 
   <header class="max-w-2xl w-full text-center my-6">
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-500 tracking-tight">SunsetLaps</h1>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-500 tracking-tight">Sunset Laps</h1>
     <p class="text-slate-400 mt-2 text-sm sm:text-base">Find golden hour, sunset, and sunrise session times for racetracks worldwide.</p>
   </header>
 
@@ -84,19 +84,19 @@
 
     <!-- In-Game Recommendation Box -->
     <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl space-y-3">
-      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended Session Start Hours</h3>
+      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended Session Start Hours (Max Light Coverage)</h3>
       
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
         <div>
           <span class="text-slate-400 block text-xs">Morning Golden Hour:</span>
           <span id="morningGHAms2Hour" class="text-lg font-extrabold text-amber-300">--:00</span>
-          <p id="morningGHDetail" class="text-xs text-slate-400 mt-0.5">Low morning light after dawn.</p>
+          <p id="morningGHDetail" class="text-xs text-slate-400 mt-0.5">Captures peak morning light.</p>
         </div>
 
         <div>
           <span class="text-slate-400 block text-xs">Evening Golden Hour:</span>
           <span id="eveningGHAms2Hour" class="text-lg font-extrabold text-amber-300">--:00</span>
-          <p id="eveningGHDetail" class="text-xs text-slate-400 mt-0.5">Warm low-angle light before sunset.</p>
+          <p id="eveningGHDetail" class="text-xs text-slate-400 mt-0.5">Captures peak evening light.</p>
         </div>
 
         <div>
@@ -116,7 +116,7 @@
   </main>
 
   <footer class="mt-8 text-slate-600 text-xs text-center">
-    Times calculated in circuit local timezone.
+    Times calculated in circuit local timezone. Built for SunsetLaps.
   </footer>
 
   <script>
@@ -279,26 +279,26 @@
       document.getElementById('sunsetTime').textContent = formatTimeStr(sunset.hour, sunset.minute);
       document.getElementById('duskTime').textContent = formatTimeStr(dusk.hour, dusk.minute);
 
-      // Calculate Hourly Recommendations
-      // 1. Morning Golden Hour Stint: Hour when sunrise starts
-      let morningGHStartHour = sunrise.hour;
+      // Calculate Best Stint Start Hours (Max Light Coverage across 60 mins)
+      
+      // 1. Morning Golden Hour: Round start time (sunrise) to closest hour so 60m session overlaps peak window
+      let morningGHStartHour = (sunrise.minute >= 30) ? (sunrise.hour + 1) % 24 : sunrise.hour;
 
-      // 2. Evening Golden Hour Stint: Hour when evening golden hour begins
-      let eveningGHStartHour = eveningGHStart.hour;
+      // 2. Evening Golden Hour: Round start time to nearest hour around golden hour start
+      let eveningGHStartHour = (eveningGHStart.minute >= 30) ? (eveningGHStart.hour + 1) % 24 : eveningGHStart.hour;
 
-      // 3. Sunset Stint: Hour preceding sunset so sunset occurs mid-stint
-      let sunsetStartHour = sunset.minute < 15 ? sunset.hour - 1 : sunset.hour;
-      if (sunsetStartHour < 0) sunsetStartHour = 23;
+      // 3. Sunset Stint: Start 30-45 mins before sunset so sunset happens mid-stint
+      let sunsetStartHour = (sunset.minute < 30) ? (sunset.hour - 1 + 24) % 24 : sunset.hour;
 
-      // 4. Sunrise Stint: Hour containing dawn so the sun rises mid-stint
-      let sunriseStartHour = dawn.hour;
+      // 4. Sunrise Stint: Start around dawn so full sunrise happens mid-stint
+      let sunriseStartHour = (dawn.minute >= 30) ? (dawn.hour + 1) % 24 : dawn.hour;
 
       // Render Recommendations
       document.getElementById('morningGHAms2Hour').textContent = `${String(morningGHStartHour).padStart(2, '0')}:00`;
-      document.getElementById('morningGHDetail').textContent = `Morning golden hour runs ${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}.`;
+      document.getElementById('morningGHDetail').textContent = `Morning GH window: ${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}.`;
 
       document.getElementById('eveningGHAms2Hour').textContent = `${String(eveningGHStartHour).padStart(2, '0')}:00`;
-      document.getElementById('eveningGHDetail').textContent = `Evening golden hour starts at ${formatTimeStr(eveningGHStart.hour, eveningGHStart.minute)}.`;
+      document.getElementById('eveningGHDetail').textContent = `Evening GH window: ${formatTimeStr(eveningGHStart.hour, eveningGHStart.minute)} - ${formatTimeStr(sunset.hour, sunset.minute)}.`;
 
       document.getElementById('sunsetAms2Hour').textContent = `${String(sunsetStartHour).padStart(2, '0')}:00`;
       document.getElementById('sunsetDetail').textContent = `Sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)} local time.`;
@@ -306,11 +306,11 @@
       document.getElementById('sunriseAms2Hour').textContent = `${String(sunriseStartHour).padStart(2, '0')}:00`;
       document.getElementById('sunriseDetail').textContent = `Sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)} local time.`;
 
-      // Update Map Position
+      // Update Map Position & Simplified Popup (Sunrise & Sunset)
       const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
       map.flyTo(trackLatLng, 4, { duration: 1.2 });
       marker.setLatLng(trackLatLng);
-      marker.bindPopup(`<b>${selectedTrack.name}</b><br>Morning GH: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>Evening GH: ${formatTimeStr(eveningGHStart.hour, eveningGHStart.minute)}<br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
+      marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunrise: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
     }
 
     // Event Listeners
