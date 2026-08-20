@@ -351,16 +351,16 @@ function updateSolarTimes() {
   let sunriseStartHour = (dawn.minute >= 30) ? (dawn.hour + 1) % 24 : dawn.hour;
 
   document.getElementById('morningGHAms2Hour').textContent = `${String(morningGHStartHour).padStart(2, '0')}:00`;
-  document.getElementById('morningGHDetail').textContent = `Morning GH window: ${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}.`;
+  document.getElementById('morningGHDetail').textContent = `Window: ${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}.`;
 
   document.getElementById('eveningGHAms2Hour').textContent = `${String(eveningGHStartHour).padStart(2, '0')}:00`;
-  document.getElementById('eveningGHDetail').textContent = `Evening GH window: ${formatTimeStr(eveningGHStart.hour, eveningGHStart.minute)} - ${formatTimeStr(sunset.hour, sunset.minute)}.`;
+  document.getElementById('eveningGHDetail').textContent = `Window: ${formatTimeStr(eveningGHStart.hour, eveningGHStart.minute)} - ${formatTimeStr(sunset.hour, sunset.minute)}.`;
 
   document.getElementById('sunsetAms2Hour').textContent = `${String(sunsetStartHour).padStart(2, '0')}:00`;
-  document.getElementById('sunsetDetail').textContent = `In-game sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)}.`;
+  document.getElementById('sunsetDetail').textContent = `Sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)}.`;
 
   document.getElementById('sunriseAms2Hour').textContent = `${String(sunriseStartHour).padStart(2, '0')}:00`;
-  document.getElementById('sunriseDetail').textContent = `In-game sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)}.`;
+  document.getElementById('sunriseDetail').textContent = `Sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)}.`;
 
   // Map view update
   const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
