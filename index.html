@@ -70,9 +70,6 @@
       </div>
     </div>
 
-    <!-- Map View -->
-    <div id="map" class="shadow-inner border border-slate-800"></div>
-
     <!-- Solar Results Grid -->
     <div id="results" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
@@ -108,7 +105,7 @@
 
     <!-- Recommendation Box -->
     <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl space-y-3">
-      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended Session Start Hours (Max Light Coverage)</h3>
+      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended Session Start</h3>
       
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
         <div>
@@ -136,6 +133,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Map View (Moved to Bottom) -->
+    <div id="map" class="shadow-inner border border-slate-800"></div>
 
   </main>
 
@@ -303,6 +303,21 @@
       return `${h}:${m}`;
     }
 
+    // Check if DST is active for a date in a specific timezone
+    function isDSTActive(date, timeZone) {
+      const getOffset = (d) => {
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone,
+          timeZoneName: 'shortOffset'
+        });
+        const parts = formatter.formatToParts(d);
+        const tzPart = parts.find(p => p.type === 'timeZoneName');
+        return tzPart ? tzPart.value : '';
+      };
+      const jan = new Date(date.getFullYear(), 0, 1);
+      return getOffset(date) !== getOffset(jan);
+    }
+
     // Core Calculation Logic
     function updateSolarTimes() {
       const selectedTrack = tracks.find(t => t.id === trackSelect.value);
@@ -310,18 +325,41 @@
 
       if (!selectedTrack || !selectedDateVal) return;
 
+      // Construct Date as standard local midnight/noon date to preserve accurate seasonal DST calculation
       const [year, month, day] = selectedDateVal.split('-').map(Number);
-      const targetDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+      const targetDate = new Date(year, month - 1, day, 12, 0, 0);
 
-      const solarTimes = SunCalc.getTimes(targetDate, selectedTrack.lat, selectedTrack.lng);
+      // Raw astronomical times from SunCalc
+      const rawSolarTimes = SunCalc.getTimes(targetDate, selectedTrack.lat, selectedTrack.lng);
 
-      const dawn = getTrackLocalTimeComponents(solarTimes.dawn, selectedTrack.timezone);
-      const sunrise = getTrackLocalTimeComponents(solarTimes.sunrise, selectedTrack.timezone);
-      const morningGHEnd = getTrackLocalTimeComponents(solarTimes.goldenHourEnd, selectedTrack.timezone);
-      const eveningGHStart = getTrackLocalTimeComponents(solarTimes.goldenHour, selectedTrack.timezone);
-      const sunset = getTrackLocalTimeComponents(solarTimes.sunset, selectedTrack.timezone);
-      const dusk = getTrackLocalTimeComponents(solarTimes.dusk, selectedTrack.timezone);
+      // -------------------------------------------------------------
+      // AMS2 Lighting Adjustments:
+      // 1. Static UTC offset DST correction: AMS2 ignores DST for many regions (-60 mins when active).
+      // 2. Visual horizon compression: Horizon geometry blocks light earlier (-15 mins).
+      // -------------------------------------------------------------
+      const dstActive = isDSTActive(targetDate, selectedTrack.timezone);
+      const dstCorrectionMinutes = dstActive ? -60 : 0; 
+      const visualHorizonMinutes = -15; 
 
+      const offsetMs = (dstCorrectionMinutes + visualHorizonMinutes) * 60 * 1000;
+
+      // Apply engine adjustments to raw dates
+      const adjustedDawn = new Date(rawSolarTimes.dawn.getTime() - offsetMs);
+      const adjustedSunrise = new Date(rawSolarTimes.sunrise.getTime() - offsetMs);
+      const adjustedMorningGHEnd = new Date(rawSolarTimes.goldenHourEnd.getTime() - offsetMs);
+      const adjustedEveningGHStart = new Date(rawSolarTimes.goldenHour.getTime() + offsetMs);
+      const adjustedSunset = new Date(rawSolarTimes.sunset.getTime() + offsetMs);
+      const adjustedDusk = new Date(rawSolarTimes.dusk.getTime() + offsetMs);
+
+      // Extract components formatted to track's local timezone
+      const dawn = getTrackLocalTimeComponents(adjustedDawn, selectedTrack.timezone);
+      const sunrise = getTrackLocalTimeComponents(adjustedSunrise, selectedTrack.timezone);
+      const morningGHEnd = getTrackLocalTimeComponents(adjustedMorningGHEnd, selectedTrack.timezone);
+      const eveningGHStart = getTrackLocalTimeComponents(adjustedEveningGHStart, selectedTrack.timezone);
+      const sunset = getTrackLocalTimeComponents(adjustedSunset, selectedTrack.timezone);
+      const dusk = getTrackLocalTimeComponents(adjustedDusk, selectedTrack.timezone);
+
+      // Update UI Solar Grid
       document.getElementById('dawnTime').textContent = formatTimeStr(dawn.hour, dawn.minute);
       document.getElementById('sunriseTime').textContent = formatTimeStr(sunrise.hour, sunrise.minute);
       document.getElementById('morningGHTime').textContent = `${formatTimeStr(sunrise.hour, sunrise.minute)} - ${formatTimeStr(morningGHEnd.hour, morningGHEnd.minute)}`;
@@ -329,6 +367,7 @@
       document.getElementById('sunsetTime').textContent = formatTimeStr(sunset.hour, sunset.minute);
       document.getElementById('duskTime').textContent = formatTimeStr(dusk.hour, dusk.minute);
 
+      // Round to nearest in-game hour slots
       let morningGHStartHour = (sunrise.minute >= 30) ? (sunrise.hour + 1) % 24 : sunrise.hour;
       let eveningGHStartHour = (eveningGHStart.minute >= 30) ? (eveningGHStart.hour + 1) % 24 : eveningGHStart.hour;
       let sunsetStartHour = (sunset.minute < 30) ? (sunset.hour - 1 + 24) % 24 : sunset.hour;
@@ -341,20 +380,20 @@
       document.getElementById('eveningGHDetail').textContent = `Evening GH window: ${formatTimeStr(eveningGHStart.hour, eveningGHStart.minute)} - ${formatTimeStr(sunset.hour, sunset.minute)}.`;
 
       document.getElementById('sunsetAms2Hour').textContent = `${String(sunsetStartHour).padStart(2, '0')}:00`;
-      document.getElementById('sunsetDetail').textContent = `Sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)} local time.`;
+      document.getElementById('sunsetDetail').textContent = `In-game sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)}.`;
 
       document.getElementById('sunriseAms2Hour').textContent = `${String(sunriseStartHour).padStart(2, '0')}:00`;
-      document.getElementById('sunriseDetail').textContent = `Sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)} local time.`;
+      document.getElementById('sunriseDetail').textContent = `In-game sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)}.`;
 
+      // Map view update
       const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
       map.flyTo(trackLatLng, 4, { duration: 1.2 });
       marker.setLatLng(trackLatLng);
-      marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunrise: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
+      marker.bindPopup(`<b>${selectedTrack.name}</b><br>In-Game Sunrise: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>In-Game Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
     }
 
     // Search Box Interaction Logic
     trackSearch.addEventListener('focus', () => {
-      // Auto-highlight existing text so typing replaces it instantly
       trackSearch.select();
       renderDropdown('');
       trackDropdown.classList.remove('hidden');
