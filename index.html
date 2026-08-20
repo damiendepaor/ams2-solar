@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SunsetLaps | AMS2 track sunrise\sunset calculator</title>
+  <title>SunsetLaps | AMS2 track sunrise/sunset calculator</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -246,9 +246,10 @@
     // Filter and render dropdown options
     function renderDropdown(filterText = '') {
       trackDropdown.innerHTML = '';
+      activeIndex = -1;
       const query = filterText.toLowerCase().trim();
 
-      const filtered = tracks.filter(t => 
+      const filtered = tracks.filter(t =>
         t.name.toLowerCase().includes(query) ||
         t.country.toLowerCase().includes(query) ||
         t.id.toLowerCase().includes(query)
@@ -262,9 +263,10 @@
         return;
       }
 
-      filtered.forEach(track => {
+      filtered.forEach((track, idx) => {
         const li = document.createElement('li');
         li.className = 'p-3 text-sm hover:bg-slate-700 cursor-pointer transition-colors flex justify-between items-center';
+        li.dataset.index = idx;
         li.innerHTML = `<span class="font-medium text-slate-100">${track.name}</span><span class="text-xs text-slate-400 ml-2">${track.country}</span>`;
         
         li.addEventListener('click', () => {
@@ -301,21 +303,6 @@
       const h = String(hour).padStart(2, '0');
       const m = String(minute).padStart(2, '0');
       return `${h}:${m}`;
-    }
-
-    // Check if DST is active for a date in a specific timezone
-    function isDSTActive(date, timeZone) {
-      const getOffset = (d) => {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-          timeZone,
-          timeZoneName: 'shortOffset'
-        });
-        const parts = formatter.formatToParts(d);
-        const tzPart = parts.find(p => p.type === 'timeZoneName');
-        return tzPart ? tzPart.value : '';
-      };
-      const jan = new Date(date.getFullYear(), 0, 1);
-      return getOffset(date) !== getOffset(jan);
     }
 
     // Core Calculation Logic
@@ -381,6 +368,40 @@ function updateSolarTimes() {
   marker.setLatLng(trackLatLng);
   marker.bindPopup(`<b>${selectedTrack.name}</b><br>In-Game Sunrise: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>In-Game Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
 }
+
+    // Keyboard navigation for dropdown
+    let activeIndex = -1;
+
+    function setActiveItem(index) {
+      const items = trackDropdown.querySelectorAll('li[data-index]');
+      items.forEach(li => li.classList.remove('bg-slate-700'));
+      activeIndex = index;
+      if (index >= 0 && index < items.length) {
+        items[index].classList.add('bg-slate-700');
+        items[index].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    trackSearch.addEventListener('keydown', (e) => {
+      const items = trackDropdown.querySelectorAll('li[data-index]');
+      if (trackDropdown.classList.contains('hidden') || items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveItem(Math.min(activeIndex + 1, items.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveItem(Math.max(activeIndex - 1, 0));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIndex >= 0 && activeIndex < items.length) {
+          items[activeIndex].click();
+        }
+      } else if (e.key === 'Escape') {
+        trackDropdown.classList.add('hidden');
+        activeIndex = -1;
+      }
+    });
 
     // Search Box Interaction Logic
     trackSearch.addEventListener('focus', () => {
