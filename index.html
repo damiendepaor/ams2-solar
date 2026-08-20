@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AMS2 Sunset Race Finder</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet CSS & JS (Free OpenStreetMap library) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- SunCalc JS CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+
+  <style>
+    /* Dark theme custom map styling */
+    #map { height: 320px; width: 100%; border-radius: 0.75rem; z-index: 10; }
+    .leaflet-tile { filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7); }
+    .leaflet-container { background: #0f172a; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col items-center p-4 sm:p-6">
+
+  <header class="max-w-2xl w-full text-center my-6">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-500 tracking-tight">AMS2 Solar Session Planner</h1>
+    <p class="text-slate-400 mt-2 text-sm sm:text-base">Find the ideal hourly in-game start time for sunset and sunrise stints in Automobilista 2.</p>
+  </header>
+
+  <main class="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl space-y-6">
+
+    <!-- Controls Form -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label for="trackSelect" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Circuit</label>
+        <select id="trackSelect" class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+          <!-- Populated by JavaScript -->
+        </select>
+      </div>
+
+      <div>
+        <label for="datePicker" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Session Date</label>
+        <input type="date" id="datePicker" class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium">
+      </div>
+    </div>
+
+    <!-- Map View -->
+    <div id="map" class="shadow-inner border border-slate-800"></div>
+
+    <!-- Solar Results Grid -->
+    <div id="results" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
+        <span class="block text-xs text-slate-400 font-medium">Dawn / Twilight</span>
+        <span id="dawnTime" class="text-lg font-bold text-slate-200 mt-1 block">--:--</span>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
+        <span class="block text-xs text-slate-400 font-medium">Sunrise</span>
+        <span id="sunriseTime" class="text-lg font-bold text-amber-400 mt-1 block">--:--</span>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
+        <span class="block text-xs text-slate-400 font-medium">Sunset</span>
+        <span id="sunsetTime" class="text-lg font-bold text-amber-500 mt-1 block">--:--</span>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
+        <span class="block text-xs text-slate-400 font-medium">Dusk / Twilight</span>
+        <span id="duskTime" class="text-lg font-bold text-slate-200 mt-1 block">--:--</span>
+      </div>
+    </div>
+
+    <!-- AMS2 In-Game Recommendation Box -->
+    <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl space-y-3">
+      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended AMS2 Session Hours</h3>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="text-slate-400 block text-xs">For Sunset Stint:</span>
+          <span id="sunsetAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
+          <p id="sunsetDetail" class="text-xs text-slate-400 mt-0.5">Start hour to catch the golden sky.</p>
+        </div>
+
+        <div>
+          <span class="text-slate-400 block text-xs">For Sunrise Stint:</span>
+          <span id="sunriseAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
+          <p id="sunriseDetail" class="text-xs text-slate-400 mt-0.5">Start hour to catch early morning light.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="mt-8 text-slate-600 text-xs text-center">
+    Built for Automobilista 2 sim racers. Times calculated in circuit local timezone.
+  </footer>
+
+  <script>
+    // AMS2 Track Database
+    const tracks = [
+      { id: "donington", name: "Donington Park", country: "UK", lat: 52.8306, lng: -1.3772, timezone: "Europe/London" },
+      { id: "brands_hatch", name: "Brands Hatch", country: "UK", lat: 51.3569, lng: 0.2631, timezone: "Europe/London" },
+      { id: "silverstone", name: "Silverstone", country: "UK", lat: 52.0786, lng: -1.0169, timezone: "Europe/London" },
+      { id: "spa", name: "Circuit de Spa-Francorchamps", country: "Belgium", lat: 50.4372, lng: 5.9714, timezone: "Europe/Brussels" },
+      { id: "nuerburgring", name: "Nürburgring Nordschleife", country: "Germany", lat: 50.3356, lng: 6.9475, timezone: "Europe/Berlin" },
+      { id: "monza", name: "Autodromo Nazionale Monza", country: "Italy", lat: 45.6156, lng: 9.2811, timezone: "Europe/Rome" },
+      { id: "interlagos", name: "Interlagos (Autódromo José Carlos Pace)", country: "Brazil", lat: -23.7036, lng: -46.6997, timezone: "America/Sao_Paulo" },
+      { id: "bathurst", name: "Mount Panorama (Bathurst)", country: "Australia", lat: -33.4536, lng: 149.5518, timezone: "Australia/Sydney" },
+      { id: "daytona", name: "Daytona International Speedway", country: "USA", lat: 29.1856, lng: -81.0705, timezone: "America/New_York" },
+      { id: "laguna_seca", name: "WeatherTech Raceway Laguna Seca", country: "USA", lat: 36.5842, lng: -121.7535, timezone: "America/Los_Angeles" },
+      { id: "road_america", name: "Road America", country: "USA", lat: 43.8014, lng: -87.9936, timezone: "America/Chicago" },
+      { id: "suzuka", name: "Suzuka / Kansai", country: "Japan", lat: 34.8431, lng: 136.5410, timezone: "Asia/Tokyo" },
+      { id: "kyalami", name: "Kyalami Grand Prix Circuit", country: "South Africa", lat: -25.9981, lng: 28.0688, timezone: "Africa/Johannesburg" }
+    ];
+
+    // DOM Elements
+    const trackSelect = document.getElementById('trackSelect');
+    const datePicker = document.getElementById('datePicker');
+    
+    // Set default date to today
+    const today = new Date();
+    datePicker.value = today.toISOString().split('T')[0];
+
+    // Initialize Map Variables
+    let map, marker;
+
+    function initMap() {
+      // Create map targeting Donington by default
+      map = L.map('map', { zoomControl: false }).setView([52.8306, -1.3772], 13);
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      marker = L.marker([52.8306, -1.3772]).addTo(map);
+    }
+
+    // Populate Dropdown
+    tracks.forEach(track => {
+      const option = document.createElement('option');
+      option.value = track.id;
+      option.textContent = `${track.name} (${track.country})`;
+      trackSelect.appendChild(option);
+    });
+
+    // Helper: Extract local hour and minute for a track timezone
+    function getTrackLocalTimeComponents(utcDate, timeZone) {
+      const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: timeZone,
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+      });
+      const parts = formatter.formatToParts(utcDate);
+      let hour = 0, minute = 0;
+      parts.forEach(p => {
+        if (p.type === 'hour') hour = parseInt(p.value, 10);
+        if (p.type === 'minute') minute = parseInt(p.value, 10);
+      });
+      return { hour, minute };
+    }
+
+    // Helper: Format string for HH:MM display
+    function formatTimeStr(hour, minute) {
+      const h = String(hour).padStart(2, '0');
+      const m = String(minute).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    // Core Calculation Logic
+    function updateSolarTimes() {
+      const selectedTrack = tracks.find(t => t.id === trackSelect.value);
+      const selectedDateVal = datePicker.value;
+
+      if (!selectedTrack || !selectedDateVal) return;
+
+      // Create Date object at noon UTC to avoid edge-of-day offsets
+      const [year, month, day] = selectedDateVal.split('-').map(Number);
+      const targetDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+
+      // Calculate Solar Times via SunCalc
+      const solarTimes = SunCalc.getTimes(targetDate, selectedTrack.lat, selectedTrack.lng);
+
+      // Convert times to track local components
+      const dawn = getTrackLocalTimeComponents(solarTimes.dawn, selectedTrack.timezone);
+      const sunrise = getTrackLocalTimeComponents(solarTimes.sunrise, selectedTrack.timezone);
+      const sunset = getTrackLocalTimeComponents(solarTimes.sunset, selectedTrack.timezone);
+      const dusk = getTrackLocalTimeComponents(solarTimes.dusk, selectedTrack.timezone);
+
+      // Render exact solar times
+      document.getElementById('dawnTime').textContent = formatTimeStr(dawn.hour, dawn.minute);
+      document.getElementById('sunriseTime').textContent = formatTimeStr(sunrise.hour, sunrise.minute);
+      document.getElementById('sunsetTime').textContent = formatTimeStr(sunset.hour, sunset.minute);
+      document.getElementById('duskTime').textContent = formatTimeStr(dusk.hour, dusk.minute);
+
+      // Calculate AMS2 Hourly Recommendations
+      // For Sunset: Pick the hour preceding sunset so the sun sets during a typical 20-40 min stint
+      let sunsetStartHour = sunset.minute < 15 ? sunset.hour - 1 : sunset.hour;
+      if (sunsetStartHour < 0) sunsetStartHour = 23;
+
+      // For Sunrise: Pick the hour containing dawn so the sun rises mid-stint
+      let sunriseStartHour = dawn.hour;
+
+      // Render AMS2 Hourly Recommendations
+      document.getElementById('sunsetAms2Hour').textContent = `${String(sunsetStartHour).padStart(2, '0')}:00`;
+      document.getElementById('sunsetDetail').textContent = `Sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)} local time.`;
+
+      document.getElementById('sunriseAms2Hour').textContent = `${String(sunriseStartHour).padStart(2, '0')}:00`;
+      document.getElementById('sunriseDetail').textContent = `Sunrise occurs at ${formatTimeStr(sunrise.hour, sunrise.minute)} local time.`;
+
+      // Update Map Position
+      const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
+      map.flyTo(trackLatLng, 13, { duration: 1.2 });
+      marker.setLatLng(trackLatLng);
+      marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
+    }
+
+    // Event Listeners
+    trackSelect.addEventListener('change', updateSolarTimes);
+    datePicker.addEventListener('change', updateSolarTimes);
+
+    // Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      updateSolarTimes();
+    });
+  </script>
+</body>
+</html>
