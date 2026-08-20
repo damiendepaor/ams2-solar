@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AMS2 Sunset Race Finder</title>
+  <title>SunsetLaps | Track Solar & Golden Hour Session Planner</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -25,8 +25,8 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col items-center p-4 sm:p-6">
 
   <header class="max-w-2xl w-full text-center my-6">
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-500 tracking-tight">AMS2 Solar Session Planner</h1>
-    <p class="text-slate-400 mt-2 text-sm sm:text-base">Find the ideal start time for sunset and sunrise sessions in Automobilista 2.</p>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-500 tracking-tight">SunsetLaps</h1>
+    <p class="text-slate-400 mt-2 text-sm sm:text-base">Find golden hour, sunset, and sunrise session times for racetracks worldwide.</p>
   </header>
 
   <main class="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl space-y-6">
@@ -50,43 +50,54 @@
     <div id="map" class="shadow-inner border border-slate-800"></div>
 
     <!-- Solar Results Grid -->
-    <div id="results" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div id="results" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
       <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
-        <span class="block text-xs text-slate-400 font-medium">Dawn / Twilight</span>
-        <span id="dawnTime" class="text-lg font-bold text-slate-200 mt-1 block">--:--</span>
+        <span class="block text-xs text-slate-400 font-medium">Dawn</span>
+        <span id="dawnTime" class="text-base sm:text-lg font-bold text-slate-200 mt-1 block">--:--</span>
       </div>
 
       <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
         <span class="block text-xs text-slate-400 font-medium">Sunrise</span>
-        <span id="sunriseTime" class="text-lg font-bold text-amber-400 mt-1 block">--:--</span>
+        <span id="sunriseTime" class="text-base sm:text-lg font-bold text-amber-400 mt-1 block">--:--</span>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
+        <span class="block text-xs text-slate-400 font-medium">Golden Hour</span>
+        <span id="goldenHourTime" class="text-base sm:text-lg font-bold text-amber-300 mt-1 block">--:--</span>
       </div>
 
       <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
         <span class="block text-xs text-slate-400 font-medium">Sunset</span>
-        <span id="sunsetTime" class="text-lg font-bold text-amber-500 mt-1 block">--:--</span>
+        <span id="sunsetTime" class="text-base sm:text-lg font-bold text-amber-500 mt-1 block">--:--</span>
       </div>
 
-      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center">
-        <span class="block text-xs text-slate-400 font-medium">Dusk / Twilight</span>
-        <span id="duskTime" class="text-lg font-bold text-slate-200 mt-1 block">--:--</span>
+      <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl text-center col-span-2 sm:col-span-1">
+        <span class="block text-xs text-slate-400 font-medium">Dusk</span>
+        <span id="duskTime" class="text-base sm:text-lg font-bold text-slate-200 mt-1 block">--:--</span>
       </div>
     </div>
 
-    <!-- AMS2 In-Game Recommendation Box -->
+    <!-- In-Game Recommendation Box -->
     <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl space-y-3">
-      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended AMS2 Session Hours</h3>
+      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider">Recommended Session Start Hours</h3>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
         <div>
-          <span class="text-slate-400 block text-xs">For Sunset Stint:</span>
-          <span id="sunsetAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
-          <p id="sunsetDetail" class="text-xs text-slate-400 mt-0.5">Start hour to catch the golden sky.</p>
+          <span class="text-slate-400 block text-xs">Golden Hour Stint:</span>
+          <span id="goldenHourAms2Hour" class="text-lg font-extrabold text-amber-300">--:00</span>
+          <p id="goldenHourDetail" class="text-xs text-slate-400 mt-0.5">Warm low-angle light before sunset.</p>
         </div>
 
         <div>
-          <span class="text-slate-400 block text-xs">For Sunrise Stint:</span>
+          <span class="text-slate-400 block text-xs">Sunset Stint:</span>
+          <span id="sunsetAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
+          <p id="sunsetDetail" class="text-xs text-slate-400 mt-0.5">Transitions directly into dusk.</p>
+        </div>
+
+        <div>
+          <span class="text-slate-400 block text-xs">Sunrise Stint:</span>
           <span id="sunriseAms2Hour" class="text-lg font-extrabold text-slate-100">--:00</span>
-          <p id="sunriseDetail" class="text-xs text-slate-400 mt-0.5">Start hour to catch early morning light.</p>
+          <p id="sunriseDetail" class="text-xs text-slate-400 mt-0.5">Catches first morning light.</p>
         </div>
       </div>
     </div>
@@ -94,11 +105,11 @@
   </main>
 
   <footer class="mt-8 text-slate-600 text-xs text-center">
-   Times calculated in circuit local timezone.
+    Times calculated in circuit local timezone. Built for SunsetLaps.
   </footer>
 
   <script>
-    // AMS2 Track Database
+    // Track Database
     const tracks = [
   /* --- UNITED KINGDOM & IRELAND --- */
   { "id": "donington", "name": "Donington Park", "country": "UK", "lat": 52.8306, "lng": -1.3772, "timezone": "Europe/London" },
@@ -184,7 +195,7 @@
 
     function initMap() {
       // Create map targeting Donington by default
-     map = L.map('map', { zoomControl: false }).setView([52.8306, -1.3772], 4);
+      map = L.map('map', { zoomControl: false }).setView([52.8306, -1.3772], 4);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -205,6 +216,7 @@
 
     // Helper: Extract local hour and minute for a track timezone
     function getTrackLocalTimeComponents(utcDate, timeZone) {
+      if (!utcDate || isNaN(utcDate.getTime())) return { hour: 0, minute: 0 };
       const formatter = new Intl.DateTimeFormat('en-GB', {
         timeZone: timeZone,
         hour: 'numeric',
@@ -244,24 +256,32 @@
       // Convert times to track local components
       const dawn = getTrackLocalTimeComponents(solarTimes.dawn, selectedTrack.timezone);
       const sunrise = getTrackLocalTimeComponents(solarTimes.sunrise, selectedTrack.timezone);
+      const goldenHour = getTrackLocalTimeComponents(solarTimes.goldenHour, selectedTrack.timezone);
       const sunset = getTrackLocalTimeComponents(solarTimes.sunset, selectedTrack.timezone);
       const dusk = getTrackLocalTimeComponents(solarTimes.dusk, selectedTrack.timezone);
 
       // Render exact solar times
       document.getElementById('dawnTime').textContent = formatTimeStr(dawn.hour, dawn.minute);
       document.getElementById('sunriseTime').textContent = formatTimeStr(sunrise.hour, sunrise.minute);
+      document.getElementById('goldenHourTime').textContent = formatTimeStr(goldenHour.hour, goldenHour.minute);
       document.getElementById('sunsetTime').textContent = formatTimeStr(sunset.hour, sunset.minute);
       document.getElementById('duskTime').textContent = formatTimeStr(dusk.hour, dusk.minute);
 
-      // Calculate AMS2 Hourly Recommendations
-      // For Sunset: Pick the hour preceding sunset so the sun sets during a typical 20-40 min stint
+      // Calculate Hourly Recommendations
+      // 1. Golden Hour Stint: Hour when golden hour begins
+      let goldenHourStartHour = goldenHour.hour;
+
+      // 2. Sunset Stint: Pick the hour preceding sunset so sunset occurs mid-stint
       let sunsetStartHour = sunset.minute < 15 ? sunset.hour - 1 : sunset.hour;
       if (sunsetStartHour < 0) sunsetStartHour = 23;
 
-      // For Sunrise: Pick the hour containing dawn so the sun rises mid-stint
+      // 3. Sunrise Stint: Pick the hour containing dawn so the sun rises mid-stint
       let sunriseStartHour = dawn.hour;
 
-      // Render AMS2 Hourly Recommendations
+      // Render Recommendations
+      document.getElementById('goldenHourAms2Hour').textContent = `${String(goldenHourStartHour).padStart(2, '0')}:00`;
+      document.getElementById('goldenHourDetail').textContent = `Golden hour starts at ${formatTimeStr(goldenHour.hour, goldenHour.minute)} local time.`;
+
       document.getElementById('sunsetAms2Hour').textContent = `${String(sunsetStartHour).padStart(2, '0')}:00`;
       document.getElementById('sunsetDetail').textContent = `Sunset occurs at ${formatTimeStr(sunset.hour, sunset.minute)} local time.`;
 
@@ -270,9 +290,9 @@
 
       // Update Map Position
       const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
-      map.flyTo(trackLatLng, 4, { duration: 1.2 })
+      map.flyTo(trackLatLng, 4, { duration: 1.2 });
       marker.setLatLng(trackLatLng);
-      marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
+      marker.bindPopup(`<b>${selectedTrack.name}</b><br>Golden Hour: ${formatTimeStr(goldenHour.hour, goldenHour.minute)}<br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
     }
 
     // Event Listeners
