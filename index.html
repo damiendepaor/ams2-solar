@@ -38,13 +38,24 @@
       <!-- Searchable Track Select Dropdown -->
       <div class="relative">
         <label for="trackSearch" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Circuit</label>
-        <input 
-          type="text" 
-          id="trackSearch" 
-          placeholder="Search track, city, or country..." 
-          autocomplete="off"
-          class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
-        />
+        <div class="relative">
+          <input 
+            type="text" 
+            id="trackSearch" 
+            placeholder="Search track, city, or country..." 
+            autocomplete="off"
+            class="w-full bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+          />
+          <!-- Clear Button (X) -->
+          <button 
+            type="button" 
+            id="clearSearch" 
+            class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-lg font-bold p-1 focus:outline-none"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        </div>
         <input type="hidden" id="trackSelect" value="donington">
         
         <!-- Options List Container -->
@@ -202,6 +213,7 @@
     const trackSearch = document.getElementById('trackSearch');
     const trackSelect = document.getElementById('trackSelect');
     const trackDropdown = document.getElementById('trackDropdown');
+    const clearSearchBtn = document.getElementById('clearSearch');
     const datePicker = document.getElementById('datePicker');
     
     // Set default date to today
@@ -221,6 +233,14 @@
       }).addTo(map);
 
       marker = L.marker([52.8306, -1.3772]).addTo(map);
+    }
+
+    function toggleClearButton() {
+      if (trackSearch.value.trim().length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
     }
 
     // Filter and render dropdown options
@@ -251,6 +271,7 @@
           trackSelect.value = track.id;
           trackSearch.value = `${track.name} (${track.country})`;
           trackDropdown.classList.add('hidden');
+          toggleClearButton();
           updateSolarTimes();
         });
 
@@ -331,19 +352,32 @@
       marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunrise: ${formatTimeStr(sunrise.hour, sunrise.minute)}<br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
     }
 
-    // Event Listeners for Searchable Combobox
+    // Search Box Interaction Logic
     trackSearch.addEventListener('focus', () => {
-      renderDropdown(trackSearch.value);
+      // Auto-highlight existing text so typing replaces it instantly
+      trackSearch.select();
+      renderDropdown('');
       trackDropdown.classList.remove('hidden');
+      toggleClearButton();
     });
 
     trackSearch.addEventListener('input', () => {
       renderDropdown(trackSearch.value);
       trackDropdown.classList.remove('hidden');
+      toggleClearButton();
+    });
+
+    // Clear Button Handler
+    clearSearchBtn.addEventListener('click', () => {
+      trackSearch.value = '';
+      trackSearch.focus();
+      renderDropdown('');
+      trackDropdown.classList.remove('hidden');
+      toggleClearButton();
     });
 
     document.addEventListener('click', (e) => {
-      if (!trackSearch.contains(e.target) && !trackDropdown.contains(e.target)) {
+      if (!trackSearch.contains(e.target) && !trackDropdown.contains(e.target) && !clearSearchBtn.contains(e.target)) {
         trackDropdown.classList.add('hidden');
       }
     });
@@ -354,11 +388,12 @@
     window.addEventListener('DOMContentLoaded', () => {
       initMap();
       
-      // Set initial default track in search field
+      // Set initial default track
       const defaultTrack = tracks.find(t => t.id === 'donington') || tracks[0];
       trackSelect.value = defaultTrack.id;
       trackSearch.value = `${defaultTrack.name} (${defaultTrack.country})`;
       
+      toggleClearButton();
       updateSolarTimes();
     });
   </script>
