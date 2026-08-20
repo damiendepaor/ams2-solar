@@ -128,7 +128,7 @@
 
     function initMap() {
       // Create map targeting Donington by default
-      map = L.map('map', { zoomControl: false }).setView([52.8306, -1.3772], 13);
+     map = L.map('map', { zoomControl: false }).setView([52.8306, -1.3772], 4);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -214,7 +214,7 @@
 
       // Update Map Position
       const trackLatLng = [selectedTrack.lat, selectedTrack.lng];
-      map.flyTo(trackLatLng, 13, { duration: 1.2 });
+      map.flyTo(trackLatLng, 4, { duration: 1.2 })
       marker.setLatLng(trackLatLng);
       marker.bindPopup(`<b>${selectedTrack.name}</b><br>Sunset: ${formatTimeStr(sunset.hour, sunset.minute)}`).openPopup();
     }
